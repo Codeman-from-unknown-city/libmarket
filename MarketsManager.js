@@ -7,6 +7,20 @@ const adapters = [WbApiAdapter, OzonApiAdapter];
 const adaptersByName = {};
 adapters.forEach(a => adaptersByName[a.name] = a);
 
+const wrap = (adapter) => new Proxy(adapter, {
+    get(target, prop) {
+        if (!(prop in target))
+            return undefined;
+        const propVal = target[prop];
+        return typeof propVal !== 'function'
+            ? propVal
+            : async (...args) => ({
+                marketplace: adapter.name,
+                data: await propVal.apply(target, args)
+            });
+    }
+});
+
 const DEFAULT_SETTINGS = {
     'Wildberries': {
         apiKey: process.env['WB_API_KEY']
@@ -33,7 +47,8 @@ export default class MarketsManager {
         for (const name in marketplacesData) {
             if (this.#marketplaceNotSupported(name))
                 throw Error(`'${name}' markeplace not supported`);
-            const adapter = new adaptersByName[name](marketplacesData[name]);
+            const settings = marketplacesData[name];
+            const adapter = wrap(new adaptersByName[name](settings));
             this.#inUse[name] = adapter;
             this.#adapterPool[name] = adapter;
         }

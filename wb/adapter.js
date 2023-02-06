@@ -7,6 +7,7 @@ export default class WbApiAdapter {
     constructor(args) {
         const { apiKey } = args;
         const apiClient = new WbApiClient(apiKey);
+        this.name = WbApiAdapter.name;
         this.marketApi = new MarketplaceApi(apiClient);
         this.defaultApi = new DefaultApi(apiClient);
     }
@@ -23,10 +24,7 @@ export default class WbApiAdapter {
                 { name: substr, top: cnt },
                 progressListener
             );
-            return ans.data.map(obj => ({
-                name: obj.objectName,
-                marketplace: WbApiAdapter.name
-            }));
+            return ans.data.map(obj => obj.objectName);
         }
         catch {
             return [];

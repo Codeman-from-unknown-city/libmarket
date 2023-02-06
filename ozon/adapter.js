@@ -11,6 +11,7 @@ export default class OzonApiAdapter {
         this.categories = null;
         const apiClient = new OzonApiClient();
         this.categoryApi = new CategoryAPIApi(apiClient);
+        this.name = OzonApiAdapter.name;
     }
 
     static #doExtractCategories(category) {
@@ -53,12 +54,10 @@ export default class OzonApiAdapter {
     async fetchCategories(substr, cnt, progressListener) {
         if (!this.categories)
             this.categories = await this.#doFetchCategories(progressListener);
+        const filter = c => c.title.toLowerCase().indexOf(substr) != -1;
         return _.take(
-            this.categories.filter(c => c.title.indexOf(substr) != -1)
-                            .map(c => ({
-                                name: c.title,
-                                marketplace: OzonApiAdapter.name,
-                            })),
+            this.categories.filter(filter)
+                           .map(c => c.title),
             cnt
         );
     }
@@ -69,12 +68,14 @@ export default class OzonApiAdapter {
     * @returns {Promise.<Array.<Object>>}
     */
     async fetchCharacteristics(name, progressListener) {
+        if (!this.categories)
+            this.categories = await this.#doFetchCategories(progressListener);
         const { apiKey, clientId } = this.args;
         const req = new Categoryv3CategoryAttributesRequest();
         req.language = 'RU';
         req.attribute_type = 'ALL';
         req.category_id = [this.categories.find(c => c.title === name)
-                                         .category_id];
+                                          .category_id];
         try {
             const ans = await this.categoryApi.categoryAPIGetCategoryAttributesV3(
                 clientId,
