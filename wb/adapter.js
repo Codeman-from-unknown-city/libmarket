@@ -41,7 +41,11 @@ export default class WbApiAdapter {
             const ans = await this.defaultApi.contentV1ObjectCharacteristicsObjectNameGet(
                 name, {}, progressListener
             );
-            return ans.data;
+            return ans.data.map(o => ({
+                title: o.name,
+                required: o.required,
+                type: o.charcType,
+            }));
         } catch (e) {
             console.error(e);
             return [];

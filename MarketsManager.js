@@ -121,7 +121,7 @@ export default class MarketsManager {
     * @param {Object[]} selected - The selected categories.
     * @param {string} selected[].title - The name of category.
     * @param {string} selected[].marketplace - The name of marketplace.
-    * @returns {Promise.<Array.<Object>>}
+    * @returns {Promise.<Array.<{{marketplace: string, data: object[]}}>>}
     */
     async fetchCharacteristics(selected, progressListener) {
         const promises = selected.map(

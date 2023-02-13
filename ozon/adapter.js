@@ -83,7 +83,11 @@ export default class OzonApiAdapter {
                 req,
                 progressListener
             );
-            return ans.result[0].attributes;
+            return ans.result[0].attributes.map(o => ({
+                title: o.name,
+                required: o.is_required,
+                type: o.type,
+            }));
         } catch (e) {
             console.error(e);
             return [];
